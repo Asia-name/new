@@ -1,0 +1,228 @@
+{
+	"info": {
+		"_postman_id": "68b3390b-eac0-449a-b3f8-9925adcfd465",
+		"name": "Tkachenko negative tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41306527"
+	},
+	"item": [
+		{
+			"name": "Signup validation",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const cases = [\r",
+							"    {\r",
+							"        description: \"Empty password\",\r",
+							"        name: \"Test\",\r",
+							"        lastName: \"User\",\r",
+							"        email: \"neg1@test.com\",\r",
+							"        password: \"\",\r",
+							"        repeatPassword: \"\",\r",
+							"        expectedStatus: \"error\"\r",
+							"    },\r",
+							"    {\r",
+							"        description: \"Password too short\",\r",
+							"        name: \"Test\",\r",
+							"        lastName: \"User\",\r",
+							"        email: \"neg2@test.com\",\r",
+							"        password: \"1\",\r",
+							"        repeatPassword: \"1\",\r",
+							"        expectedStatus: \"error\"\r",
+							"    },\r",
+							"    {\r",
+							"        description: \"Invalid email format\",\r",
+							"        name: \"Test\",\r",
+							"        lastName: \"User\",\r",
+							"        email: \"invalid-email\",\r",
+							"        password: \"Qwerty123\",\r",
+							"        repeatPassword: \"Qwerty123\",\r",
+							"        expectedStatus: \"error\"\r",
+							"    },\r",
+							"    {\r",
+							"        description: \"Passwords do not match\",\r",
+							"        name: \"Test\",\r",
+							"        lastName: \"User\",\r",
+							"        email: \"neg3@test.com\",\r",
+							"        password: \"Qwerty123\",\r",
+							"        repeatPassword: \"WrongPassword\",\r",
+							"        expectedStatus: \"error\"\r",
+							"    }\r",
+							"];\r",
+							"\r",
+							"let i = pm.variables.get(\"i\");\r",
+							"if (!i) i = 0;\r",
+							"\r",
+							"pm.variables.set(\"case\", JSON.stringify(cases[i]));\r",
+							"\r",
+							"if (i < cases.length - 1) {\r",
+							"    pm.variables.set(\"i\", Number(i) + 1);\r",
+							"    pm.variables.set(\"hasNext\", true);\r",
+							"} else {\r",
+							"    pm.variables.set(\"hasNext\", false);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const body = pm.response.json();\r",
+							"const currentCase = JSON.parse(pm.variables.get(\"case\"));\r",
+							"\r",
+							"pm.test(\"status matches\", function () {\r",
+							"    pm.expect(body.status).to.eql(currentCase.expectedStatus);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"message exists\", function () {\r",
+							"    pm.expect(body.message).to.exist;\r",
+							"});\r",
+							"\r",
+							"if (pm.variables.get(\"hasNext\")) {\r",
+							"    postman.setNextRequest(\"Signup validation\");\r",
+							"} else {\r",
+							"    postman.setNextRequest(null);\r",
+							"    pm.variables.unset(\"i\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{{case}}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}auth/signup",
+					"host": [
+						"{{baseUrl}}auth"
+					],
+					"path": [
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Profile validation",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const profileCases = [\r",
+							"    {\r",
+							"        description: \"Empty name\",\r",
+							"        name: \"\",\r",
+							"        lastName: \"User\",\r",
+							"        phone: \"1234567890\",\r",
+							"        expectedStatus: \"error\"\r",
+							"    },\r",
+							"    {\r",
+							"        description: \"Too short name\",\r",
+							"        name: \"A\",\r",
+							"        lastName: \"User\",\r",
+							"        phone: \"1234567890\",\r",
+							"        expectedStatus: \"error\"\r",
+							"    },\r",
+							"    {\r",
+							"        description: \"Invalid phone\",\r",
+							"        name: \"Test\",\r",
+							"        lastName: \"User\",\r",
+							"        phone: \"abcdefghij\",\r",
+							"        expectedStatus: \"error\"\r",
+							"    }\r",
+							"];\r",
+							"\r",
+							"let i = Number(pm.variables.get(\"profileIndex\") || 0);\r",
+							"\r",
+							"pm.variables.set(\"profileCase\", JSON.stringify(profileCases[i]));\r",
+							"\r",
+							"const hasNext = i < profileCases.length - 1;\r",
+							"pm.variables.set(\"profileHasNext\", hasNext);\r",
+							"\r",
+							"pm.variables.set(\"profileIndex\", i + 1);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const body = pm.response.json();\r",
+							"const currentCase = JSON.parse(pm.variables.get(\"profileCase\"));\r",
+							"\r",
+							"pm.test(\"Status matches expectation\", function () {\r",
+							"    pm.expect(body.status).to.eql(currentCase.expectedStatus);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Message exists\", function () {\r",
+							"    pm.expect(body.message).to.exist;\r",
+							"});\r",
+							"\r",
+							"// Переходимо до наступного кейсу, якщо він є\r",
+							"if (pm.variables.get(\"profileHasNext\")) {\r",
+							"    postman.setNextRequest(\"Profile validation\");\r",
+							"} else {\r",
+							"    postman.setNextRequest(null);\r",
+							"    pm.variables.unset(\"profileIndex\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{profileCase}}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/profile",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						"profile"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
